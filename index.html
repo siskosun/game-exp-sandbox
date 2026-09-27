@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tap Dot</title>
+<style>
+html,body{height:100%;margin:0;font-family:system-ui;background:#111;color:#fff}
+body{display:grid;place-items:center}.card{width:min(92vw,560px);text-align:center}
+.arena{position:relative;height:360px;border:2px solid #555;border-radius:16px;background:#1b1b1b;overflow:hidden}
+.dot{position:absolute;width:58px;height:58px;border:0;border-radius:50%;background:#fff;cursor:pointer;display:none}
+.hud{display:flex;justify-content:space-between;margin:12px 0}.btn{padding:10px 18px;font-size:16px}.hint{opacity:.7;font-size:14px}
+</style>
+</head>
+<body>
+<main class="card">
+<h1>Tap Dot</h1>
+<p>20 秒内尽可能多地点中圆点。</p>
+<div class="hud"><span>得分：<b id="score">0</b></span><span>剩余：<b id="time">20</b>s</span></div>
+<div id="arena" class="arena"><button id="dot" class="dot" aria-label="目标"></button></div>
+<p><button id="start" class="btn">开始</button></p>
+<p id="msg" class="hint">用于 game-exp 流程测试的极简原型。</p>
+</main>
+<script>
+const arena=document.querySelector('#arena'),dot=document.querySelector('#dot'),scoreEl=document.querySelector('#score'),timeEl=document.querySelector('#time'),start=document.querySelector('#start'),msg=document.querySelector('#msg');
+let score=0,left=20,timer=null;
+function move(){const x=Math.random()*(arena.clientWidth-58),y=Math.random()*(arena.clientHeight-58);dot.style.transform=`translate(${x}px,${y}px)`}
+function end(){clearInterval(timer);timer=null;dot.style.display='none';start.disabled=false;msg.textContent=`结束：${score} 分。点击开始可重玩。`}
+function begin(){score=0;left=20;scoreEl.textContent=score;timeEl.textContent=left;msg.textContent='进行中';start.disabled=true;dot.style.display='block';move();timer=setInterval(()=>{left--;timeEl.textContent=left;if(left<=0)end()},1000)}
+dot.addEventListener('click',()=>{if(!timer)return;score++;scoreEl.textContent=score;move()});
+start.addEventListener('click',begin);
+</script>
+</body>
+</html>
