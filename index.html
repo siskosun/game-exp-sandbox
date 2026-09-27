@@ -15,7 +15,7 @@ body{display:grid;place-items:center}.card{width:min(92vw,560px);text-align:cent
 <body>
 <main class="card">
 <h1>Tap Dot</h1>
-<p>20 秒内尽可能多地点中圆点。</p>
+<p>初始 20 秒：命中 +0.3s，点空 −0.5s。把时间当成资源来管理。</p>
 <div class="hud"><span>得分：<b id="score">0</b></span><span>剩余：<b id="time">20</b>s</span></div>
 <div id="arena" class="arena"><button id="dot" class="dot" aria-label="目标"></button></div>
 <p><button id="start" class="btn">开始</button></p>
@@ -23,11 +23,14 @@ body{display:grid;place-items:center}.card{width:min(92vw,560px);text-align:cent
 </main>
 <script>
 const arena=document.querySelector('#arena'),dot=document.querySelector('#dot'),scoreEl=document.querySelector('#score'),timeEl=document.querySelector('#time'),start=document.querySelector('#start'),msg=document.querySelector('#msg');
+const TICK=100,HIT_BONUS=0.3,MISS_PENALTY=0.5;
 let score=0,left=20,timer=null;
+function show(){timeEl.textContent=Math.max(0,Math.ceil(left))}
 function move(){const x=Math.random()*(arena.clientWidth-58),y=Math.random()*(arena.clientHeight-58);dot.style.transform=`translate(${x}px,${y}px)`}
-function end(){clearInterval(timer);timer=null;dot.style.display='none';start.disabled=false;msg.textContent=`结束：${score} 分。点击开始可重玩。`}
-function begin(){score=0;left=20;scoreEl.textContent=score;timeEl.textContent=left;msg.textContent='进行中';start.disabled=true;dot.style.display='block';move();timer=setInterval(()=>{left--;timeEl.textContent=left;if(left<=0)end()},1000)}
-dot.addEventListener('click',()=>{if(!timer)return;score++;scoreEl.textContent=score;move()});
+function end(){clearInterval(timer);timer=null;show();dot.style.display='none';start.disabled=false;msg.textContent=`结束：${score} 分。点击开始可重玩。`}
+function begin(){score=0;left=20;show();scoreEl.textContent=score;msg.textContent='进行中';start.disabled=true;dot.style.display='block';move();timer=setInterval(()=>{left-=TICK/1000;show();if(left<=0)end()},TICK)}
+dot.addEventListener('click',e=>{if(!timer)return;e.stopPropagation();score++;left+=HIT_BONUS;scoreEl.textContent=score;show();move()});
+arena.addEventListener('click',e=>{if(!timer||e.target!==arena)return;left-=MISS_PENALTY;show();if(left<=0)end()});
 start.addEventListener('click',begin);
 </script>
 </body>
